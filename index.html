@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>IQ Quiz Pro</title>
+    <!-- Telegram WebApp Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+      :root {
+        /* Vibrant Modern Palette */
+        --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --glass-border: rgba(255, 255, 255, 0.4);
+        --primary-gradient: linear-gradient(90deg, #ff512f 0%, #dd2476 100%);
+        --secondary-gradient: linear-gradient(90deg, #4776e6 0%, #8e54e9 100%);
+
+        --text-main: #2d3436;
+        --text-muted: #636e72;
+        --white: #ffffff;
+
+        /* Telegram Theme Overrides */
+        --tg-bg: var(--tg-theme-bg-color, #ffffff);
+        --tg-text: var(--tg-theme-text-color, #2d3436);
+        --tg-button: var(--tg-theme-button-color, #764ba2);
+        --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+
+        --radius-lg: 28px;
+        --radius-md: 20px;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Basic Reset */
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--bg-gradient);
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Animated Blobs */
+      .blob {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        filter: blur(50px);
+        border-radius: 50%;
+        z-index: 0;
+        animation: move 20s infinite alternate;
+      }
+      .blob-1 {
+        top: -100px;
+        left: -100px;
+        background: rgba(255, 81, 47, 0.3);
+      }
+      .blob-2 {
+        bottom: -100px;
+        right: -100px;
+        background: rgba(71, 118, 230, 0.3);
+        animation-delay: -5s;
+      }
+
+      @keyframes move {
+        from {
+          transform: translate(0, 0) scale(1);
+        }
+        to {
+          transform: translate(50px, 100px) scale(1.2);
+        }
+      }
+
+      #app-viewport {
+        width: 100%;
+        max-width: 480px;
+        height: 100%;
+        max-height: 900px;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Glass Container */
+      .glass-panel {
+        flex: 1;
+        margin: 10px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .content {
+        padding: 24px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Typography */
+      h1 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 10px 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      p {
+        font-size: 16px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 18px;
+        border-radius: 50px;
+        border: none;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          opacity 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 100%;
+      }
+      .btn:active {
+        transform: scale(0.96);
+        opacity: 0.9;
+      }
+      .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+      }
+      .btn-secondary {
+        background: var(--secondary-gradient);
+        color: white;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 2px solid #ddd;
+        color: var(--text-main);
+      }
+      .btn-disabled {
+        background: #e0e0e0;
+        color: #a0a0a0;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      /* Splash Screen */
+      #screen-splash {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        background: var(--bg-gradient);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        transition: opacity 0.4s ease;
+      }
+      .logo-mark {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Home Screen */
+      .hero-card {
+        background:
+          linear-gradient(white, white) padding-box,
+          var(--primary-gradient) border-box;
+        border: 3px solid transparent;
+        border-radius: var(--radius-md);
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      /* Segmented Control */
+      .segments {
+        display: flex;
+        background: #f0f0f0;
+        padding: 4px;
+        border-radius: 16px;
+        margin-bottom: 20px;
+      }
+      .segment {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .segment.active {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: #ff512f;
+      }
+
+      /* Quiz UI */
+      .progress-area {
+        margin-bottom: 20px;
+      }
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .progress-bar {
+        height: 10px;
+        background: #eee;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--primary-gradient);
+        width: 0%;
+        transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .options-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .option-tile {
+        background: white;
+        border: 2px solid #f0f0f0;
+        padding: 16px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .option-tile.selected {
+        border-color: #ff512f;
+        background: #fff5f5;
+      }
+      .option-icon {
+        width: 36px;
+        height: 36px;
+        background: #f8f8f8;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Result UI */
+      .result-badge {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 6px solid #ff512f;
+        margin: 0 auto 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        box-shadow: 0 10px 20px rgba(255, 81, 47, 0.2);
+      }
+      .result-score {
+        font-size: 36px;
+        font-weight: 800;
+      }
+      .result-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
+
+      /* Modal / Toast */
+      .toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 14px;
+        z-index: 1000;
+        opacity: 0;
+        transition: 0.3s;
+        pointer-events: none;
+      }
+      .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.3s;
+      }
+      .modal {
+        background: white;
+        border-radius: 24px;
+        padding: 24px;
+        width: 100%;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+      .visible {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+
+      /* Monetization Banner */
+      .sponsor-banner {
+        margin-top: auto;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 16px;
+        border: 1px dashed #ccc;
+        text-align: center;
+        font-size: 13px;
+        color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div id="app-viewport">
+      <!-- Splash Screen -->
+      <div id="screen-splash">
+        <div class="logo-mark">⚡</div>
+        <h2 id="splash-name" style="color: white; letter-spacing: 1px">
+          IQ QUIZ PRO
+        </h2>
+      </div>
+
+      <!-- Glass Panel -->
+      <div class="glass-panel">
+        <!-- Home Screen -->
+        <section id="screen-home" class="content hidden">
+          <div class="hero-card">
+            <div style="font-size: 40px; margin-bottom: 10px">🏆</div>
+            <h1>Quiz Smart Uz</h1>
+            <p>Bugun 1.2k+ odam o'z intellektini sinadi. Sizchi?</p>
+          </div>
+
+          <h2>Test turini tanlang</h2>
+          <div class="segments">
+            <div class="segment active" data-type="iq">IQ & Mantiq</div>
+            <div class="segment" data-type="personality">Shaxsiyat</div>
+          </div>
+
+          <div
+            id="quiz-info"
+            class="card"
+            style="margin-bottom: 24px; font-size: 14px"
+          >
+            <p id="type-desc">
+              🧠 10 ta mantiqiy savol orqali IQ darajangizni aniqlang.
+            </p>
+          </div>
+
+          <button id="btn-start" class="btn btn-primary">Boshlash 🚀</button>
+
+          <div
+            class="sponsor-line hidden"
+            id="sponsor-tag"
+            style="
+              text-align: center;
+              margin-top: 15px;
+              font-size: 12px;
+              color: #888;
+            "
+          >
+            Hamkor: <span id="sponsor-name"></span>
+          </div>
+        </section>
+
+        <!-- Quiz Screen -->
+        <section id="screen-quiz" class="content hidden">
+          <div class="progress-area">
+            <div class="progress-header">
+              <span id="step-count">3 / 10</span>
+              <span id="quiz-mode-label" style="color: #ff512f">IQ Test</span>
+            </div>
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="question-box">
+            <h2 id="q-text">Savol yuklanmoqda...</h2>
+          </div>
+
+          <div class="options-grid" id="options-container">
+            <!-- Options injected here -->
+          </div>
+
+          <div style="margin-top: auto; padding-top: 20px">
+            <button id="btn-next" class="btn btn-disabled">
+              Keyingi Savol ➔
+            </button>
+          </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="screen-result" class="content hidden">
+          <div class="text-center" style="text-align: center">
+            <div class="result-badge">
+              <span class="result-score" id="res-score">110</span>
+              <span class="result-label" id="res-label">IQ SCORE</span>
+            </div>
+            <h2 id="res-title">Siz: Analitik</h2>
+            <p id="res-description" style="margin-bottom: 24px">
+              Siz voqealarni chuqur tahlil qila olasiz.
+            </p>
+          </div>
+
+          <button
+            id="btn-share"
+            class="btn btn-primary"
+            style="margin-bottom: 12px"
+          >
+            Ulashish 😎
+          </button>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px">
+            <button id="btn-restart" class="btn btn-outline">Qaytadan</button>
+            <a
+              id="btn-channel"
+              href="#"
+              target="_blank"
+              class="btn btn-secondary"
+              style="flex: 2; text-decoration: none"
+              >Kanalga o'tish 📢</a
+            >
+          </div>
+
+          <div class="sponsor-banner">
+            <p id="banner-text">🎁 Bonus: Shaxsiyat testini ham topshiring!</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Modals & Toasts -->
+    <div id="toast" class="toast">Javobni tanlang</div>
+    <div id="modal-resume" class="modal-overlay">
+      <div class="modal">
+        <h3>Davom ettirasizmi?</h3>
+        <p>
+          Sizda tugatilmagan test bor. Oxirgi savoldan davom etishni
+          xohlaysizmi?
+        </p>
+        <div style="display: flex; gap: 10px; margin-top: 20px">
+          <button id="btn-resume-no" class="btn btn-outline" style="flex: 1">
+            Qaytadan
+          </button>
+          <button id="btn-resume-yes" class="btn btn-primary" style="flex: 1">
+            Davom
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /** * CONFIGURATION
+       */
+      const CONFIG = {
+        APP_NAME: "IQ Quiz Pro",
+        BOT_LINK: "https://t.me/QuizSmartUz_bot",
+        CHANNEL_LINK: "https://t.me/SmartUzChannel",
+        BANNER_LINK: "https://t.me/SmartUzChannel",
+        SPONSOR_NAME: "Bu yerda sizning reklamangiz bolishi mumkin", // Set to "" to hide
+      };
+
+      const QUIZ_DATA = {
+        iq: {
+          label: "IQ & Mantiq",
+          desc: "🧠 10 ta mantiqiy savol orqali IQ darajangizni aniqlang.",
+          questions: [
+            {
+              id: 1,
+              text: "Ketma-ketlikda keyingi son: 1, 4, 9, 16, ...?",
+              options: [
+                { t: "20", s: 0 },
+                { t: "25", s: 3 },
+                { t: "24", s: 0 },
+                { t: "30", s: 0 },
+              ],
+            },
+            {
+              id: 2,
+              text: "Qaysi so'z mantiqan boshqalarga mos emas?",
+              options: [
+                { t: "Kitob", s: 0 },
+                { t: "Daftar", s: 0 },
+                { t: "Qalam", s: 0 },
+                { t: "Koptok", s: 3 },
+              ],
+            },
+            {
+              id: 3,
+              text: "Uka 4 yoshda, akasi undan 2 barobar katta. Uka 10 yoshga kirganda akasi necha yoshda bo'ladi?",
+              options: [
+                { t: "20", s: 0 },
+                { t: "14", s: 3 },
+                { t: "12", s: 0 },
+                { t: "18", s: 0 },
+              ],
+            },
+            {
+              id: 4,
+              text: "Qaysi shakl boshqacha?",
+              options: [
+                { t: "Uchburchak", s: 0 },
+                { t: "Kvadrat", s: 0 },
+                { t: "Aylana", s: 3 },
+                { t: "Trapetsiya", s: 0 },
+              ],
+            },
+            {
+              id: 5,
+              text: "Agar barcha gullar o'simlik bo'lsa va barcha o'simliklar tirik bo'lsa, unda:",
+              options: [
+                { t: "Hamma gullar tirik", s: 3 },
+                { t: "Gullar o'simlik emas", s: 0 },
+                { t: "Tiriklar faqat gul", s: 0 },
+                { t: "Bilmayman", s: 0 },
+              ],
+            },
+            {
+              id: 6,
+              text: "1, 2, 4, 7, 11, ... keyingi son?",
+              options: [
+                { t: "15", s: 0 },
+                { t: "16", s: 3 },
+                { t: "14", s: 0 },
+                { t: "18", s: 0 },
+              ],
+            },
+            {
+              id: 7,
+              text: "Kompyuter : Klaviatura :: Mashina : ?",
+              options: [
+                { t: "G'ildirak", s: 0 },
+                { t: "Rul", s: 3 },
+                { t: "Benzin", s: 0 },
+                { t: "Yo'l", s: 0 },
+              ],
+            },
+            {
+              id: 8,
+              text: "Qaysi biri eng katta hajmli?",
+              options: [
+                { t: "Litrlik banka", s: 0 },
+                { t: "5 litrlik chelak", s: 3 },
+                { t: "Choy qoshiq", s: 0 },
+                { t: "Piyola", s: 0 },
+              ],
+            },
+            {
+              id: 9,
+              text: "Tog' : Cho'qqi :: Dengiz : ?",
+              options: [
+                { t: "Suv", s: 0 },
+                { t: "Baliq", s: 0 },
+                { t: "Tub", s: 3 },
+                { t: "Sohil", s: 0 },
+              ],
+            },
+            {
+              id: 10,
+              text: "Dunyo xaritasida qaysi materik yo'q?",
+              options: [
+                { t: "Yevrosiyo", s: 0 },
+                { t: "Atlantida", s: 3 },
+                { t: "Afrika", s: 0 },
+                { t: "Avstraliya", s: 0 },
+              ],
+            },
+          ],
+        },
+        personality: {
+          label: "Shaxsiyat Testi",
+          desc: "🌟 Siz kimsiz? Lider, Ijodkor yoki Do'stona insonmi?",
+          questions: [
+            {
+              id: 1,
+              text: "Yangi loyihada o'zingizni qanday ko'rasiz?",
+              options: [
+                { t: "Reja tuzuvchi", type: "A" },
+                { t: "Boshqaruvchi", type: "L" },
+                { t: "G'oya beruvchi", type: "I" },
+                { t: "Yordamchi", type: "D" },
+              ],
+            },
+            {
+              id: 2,
+              text: "Muammo chiqsa birinchi nima qilasiz?",
+              options: [
+                { t: "Sababini qidiraman", type: "A" },
+                { t: "Yechishga buyruq beraman", type: "L" },
+                { t: "Yangi yo'l o'ylayman", type: "I" },
+                { t: "Do'stlarimdan so'rayman", type: "D" },
+              ],
+            },
+            {
+              id: 3,
+              text: "Dam olish kuni siz uchun qanday bo'lishi kerak?",
+              options: [
+                { t: "Kitob va tahlil", type: "A" },
+                { t: "Sport va g'alaba", type: "L" },
+                { t: "Rasm chizish/Musiqa", type: "I" },
+                { t: "Oila bilan suhbat", type: "D" },
+              ],
+            },
+            {
+              id: 4,
+              text: "Sizni qaysi sifat yaxshi ifodalaydi?",
+              options: [
+                { t: "Aniq", type: "A" },
+                { t: "Qat'iyatli", type: "L" },
+                { t: "Erkin", type: "I" },
+                { t: "Mehribon", type: "D" },
+              ],
+            },
+            {
+              id: 5,
+              text: "Kutilmagan mehmon kelsa...",
+              options: [
+                { t: "Rejam buzilganidan xafa bo'laman", type: "A" },
+                { t: "Vaziyatni boshqaraman", type: "L" },
+                { t: "Xursand bo'lib kutib olaman", type: "I" },
+                { t: "Dasturxon tuzataman", type: "D" },
+              ],
+            },
+            {
+              id: 6,
+              text: "Kelajakda kim bo'lishni xohlaysiz?",
+              options: [
+                { t: "Olim/Ekspert", type: "A" },
+                { t: "Direktor/Boshliq", type: "L" },
+                { t: "Artist/Dizayner", type: "I" },
+                { t: "Psixolog/Ustoz", type: "D" },
+              ],
+            },
+            {
+              id: 7,
+              text: "Qaror qabul qilishda...",
+              options: [
+                { t: "Faktlarga tayanaman", type: "A" },
+                { t: "Tez qaror qilaman", type: "L" },
+                { t: "Instinktga ishonaman", type: "I" },
+                { t: "Boshqalarni eshitaman", type: "D" },
+              ],
+            },
+            {
+              id: 8,
+              text: "Siz uchun eng yomon narsa?",
+              options: [
+                { t: "Xato qilish", type: "A" },
+                { t: "Yutqazish", type: "L" },
+                { t: "Zerikish", type: "I" },
+                { t: "Yolg'izlik", type: "D" },
+              ],
+            },
+            {
+              id: 9,
+              text: "O'qishda qaysi fanni yoqtirasiz?",
+              options: [
+                { t: "Matematika/Fizika", type: "A" },
+                { t: "Tarix/Siyosat", type: "L" },
+                { t: "Adabiyot/San'at", type: "I" },
+                { t: "Biologiya/Tillar", type: "D" },
+              ],
+            },
+            {
+              id: 10,
+              text: "Atrofingizdagilar sizni qanday bilishadi?",
+              options: [
+                { t: "Aqlli", type: "A" },
+                { t: "Jasur", type: "L" },
+                { t: "Qiziqarli", type: "I" },
+                { t: "Isiriq", type: "D" },
+              ],
+            },
+          ],
+        },
+      };
+
+      /**
+       * APP STATE
+       */
+      let State = {
+        view: "home",
+        quizType: "iq",
+        index: 0,
+        answers: [],
+        selected: null,
+        score: 0,
+      };
+
+      const App = {
+        init() {
+          this.tg = window.Telegram?.WebApp;
+          if (this.tg) {
+            this.tg.ready();
+            this.tg.expand();
+          }
+
+          this.bindEvents();
+          this.checkResume();
+
+          // Splash to Home
+          setTimeout(() => {
+            document.getElementById("screen-splash").style.opacity = "0";
+            setTimeout(() => {
+              document.getElementById("screen-splash").classList.add("hidden");
+              this.showScreen("home");
+            }, 400);
+          }, 800);
+
+          if (CONFIG.SPONSOR_NAME) {
+            document.getElementById("sponsor-name").textContent =
+              CONFIG.SPONSOR_NAME;
+            document.getElementById("sponsor-tag").classList.remove("hidden");
+          }
+        },
+
+        bindEvents() {
+          // Segment switching
+          document.querySelectorAll(".segment").forEach((el) => {
+            el.onclick = () => {
+              document
+                .querySelectorAll(".segment")
+                .forEach((s) => s.classList.remove("active"));
+              el.classList.add("active");
+              State.quizType = el.dataset.type;
+              document.getElementById("type-desc").textContent =
+                QUIZ_DATA[State.quizType].desc;
+              this.haptic("light");
+            };
+          });
+
+          document.getElementById("btn-start").onclick = () => this.startQuiz();
+          document.getElementById("btn-next").onclick = () => this.nextStep();
+          document.getElementById("btn-restart").onclick = () => this.restart();
+          document.getElementById("btn-share").onclick = () => this.share();
+          document.getElementById("btn-channel").href = CONFIG.CHANNEL_LINK;
+
+          // Resume buttons
+          document.getElementById("btn-resume-no").onclick = () =>
+            this.clearAndRestart();
+          document.getElementById("btn-resume-yes").onclick = () =>
+            this.resume();
+
+          if (this.tg) {
+            this.tg.BackButton.onClick(() => {
+              if (State.view === "quiz") this.confirmExit();
+              else this.showScreen("home");
+            });
+          }
+        },
+
+        showScreen(id) {
+          State.view = id;
+          ["home", "quiz", "result"].forEach((s) =>
+            document.getElementById(`screen-${s}`).classList.add("hidden"),
+          );
+          document.getElementById(`screen-${id}`).classList.remove("hidden");
+
+          if (this.tg) {
+            if (id === "home") this.tg.BackButton.hide();
+            else this.tg.BackButton.show();
+          }
+        },
+
+        startQuiz() {
+          State.index = 0;
+          State.answers = [];
+          State.score = 0;
+          this.haptic("impact");
+          this.renderQuestion();
+          this.showScreen("quiz");
+        },
+
+        renderQuestion() {
+          const quiz = QUIZ_DATA[State.quizType];
+          const q = quiz.questions[State.index];
+
+          document.getElementById("quiz-mode-label").textContent = quiz.label;
+          document.getElementById("step-count").textContent =
+            `${State.index + 1} / ${quiz.questions.length}`;
+          document.getElementById("progress-fill").style.width =
+            `${(State.index / quiz.questions.length) * 100}%`;
+          document.getElementById("q-text").textContent = q.text;
+
+          const container = document.getElementById("options-container");
+          container.innerHTML = "";
+          State.selected = null;
+          document.getElementById("btn-next").className = "btn btn-disabled";
+
+          q.options.forEach((opt, i) => {
+            const div = document.createElement("div");
+            div.className = "option-tile";
+            div.innerHTML = `
+                        <div class="option-icon">${String.fromCharCode(65 + i)}</div>
+                        <div class="option-text">${opt.t}</div>
+                    `;
+            div.onclick = () => {
+              this.haptic("light");
+              document
+                .querySelectorAll(".option-tile")
+                .forEach((t) => t.classList.remove("selected"));
+              div.classList.add("selected");
+              State.selected = opt;
+              document.getElementById("btn-next").className = "btn btn-primary";
+            };
+            container.appendChild(div);
+          });
+          this.saveState();
+        },
+
+        nextStep() {
+          if (!State.selected) {
+            this.toast("Javobni tanlang");
+            return;
+          }
+
+          State.answers.push(State.selected);
+          this.haptic("light");
+
+          if (State.index < QUIZ_DATA[State.quizType].questions.length - 1) {
+            State.index++;
+            this.renderQuestion();
+          } else {
+            this.complete();
+          }
+        },
+
+        complete() {
+          this.haptic("notification", "success");
+          this.calculateScore();
+          this.renderResult();
+          this.showScreen("result");
+          this.clearState();
+        },
+
+        calculateScore() {
+          if (State.quizType === "iq") {
+            let pts = 0;
+            State.answers.forEach((a) => (pts += a.s || 0));
+            State.score = 85 + pts;
+          } else {
+            const counts = { L: 0, A: 0, I: 0, D: 0 };
+            State.answers.forEach((a) => counts[a.type]++);
+            const max = Object.keys(counts).reduce((a, b) =>
+              counts[a] > counts[b] ? a : b,
+            );
+            State.score = max; // Store type code as score
+          }
+        },
+
+        renderResult() {
+          const title = document.getElementById("res-title");
+          const desc = document.getElementById("res-description");
+          const scoreVal = document.getElementById("res-score");
+          const label = document.getElementById("res-label");
+
+          if (State.quizType === "iq") {
+            label.textContent = "IQ SCORE";
+            scoreVal.textContent = State.score;
+            if (State.score < 95) {
+              title.textContent = "Boshlang'ich daraja";
+              desc.textContent =
+                "Sizda rivojlanish uchun katta potensial bor. Ko'proq mantiqiy mashqlar bajaring.";
+            } else if (State.score < 105) {
+              title.textContent = "O'rtacha daraja";
+              desc.textContent =
+                "Siz ko'pchilik qatori mantiqiy fikrlaysiz. Yaxshi natija!";
+            } else if (State.score < 115) {
+              title.textContent = "Yaxshi daraja";
+              desc.textContent =
+                "Sizning intellektual salohiyatingiz ancha yuqori. Murakkab vazifalardan qo'rqmang.";
+            } else {
+              title.textContent = "A'lo daraja";
+              desc.textContent =
+                "Haqiqiy geniy! Dunyoqarashingiz va mantiqingiz hayratlanarli darajada kuchli.";
+            }
+          } else {
+            label.textContent = "TURINGIZ";
+            scoreVal.textContent = State.score; // L, A, I, or D
+            const types = {
+              L: {
+                t: "Lider",
+                d: "Siz mas'uliyatni o'z bo'yniga oladigan va jamoani boshqaradigan qat'iyatli insonsiz.",
+              },
+              A: {
+                t: "Analitik",
+                d: "Har bir narsani tahlil qilasiz, mantiq va faktlar siz uchun eng muhimi.",
+              },
+              I: {
+                t: "Ijodkor",
+                d: "Sizda fantaziya boy, yangi g'oyalar yaratishga usta va erkinlikni sevasiz.",
+              },
+              D: {
+                t: "Do'stona",
+                d: "Atrofingizdagilar bilan juda yaxshi til topishasiz, samimiy va ishonchli do'stsiz.",
+              },
+            };
+            const res = types[State.score];
+            title.textContent = res.t;
+            desc.textContent =
+              res.d +
+              " Senga mos maslahat: O'z kuchingni to'g'ri maqsadlarga yo'naltir.";
+          }
+        },
+
+        share() {
+          const quizName = QUIZ_DATA[State.quizType].label;
+          const resultTitle = document.getElementById("res-title").textContent;
+          const text = `Men "${quizName}"dan "${resultTitle}" chiqdim! 😎 Sen ham o'zingni sinab ko'r 👉 ${CONFIG.BOT_LINK}`;
+
+          if (this.tg) {
+            this.tg.openTelegramLink(
+              `https://t.me/share/url?url=${encodeURIComponent(CONFIG.BOT_LINK)}&text=${encodeURIComponent(text)}`,
+            );
+          } else {
+            this.toast("Havola nusxalandi!");
+            const el = document.createElement("textarea");
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand("copy");
+            document.body.removeChild(el);
+          }
+          console.log("share_clicked");
+        },
+
+        restart() {
+          this.showScreen("home");
+        },
+
+        confirmExit() {
+          if (confirm("Testdan chiqasizmi? Progress saqlanadi.")) {
+            this.showScreen("home");
+          }
+        },
+
+        // Persistence
+        saveState() {
+          localStorage.setItem(
+            "quiz_pro_state",
+            JSON.stringify({
+              type: State.quizType,
+              index: State.index,
+              answers: State.answers,
+            }),
+          );
+        },
+        checkResume() {
+          const saved = localStorage.getItem("quiz_pro_state");
+          if (saved) {
+            const data = JSON.parse(saved);
+            if (data.index > 0) {
+              document.getElementById("modal-resume").classList.add("visible");
+            }
+          }
+        },
+        resume() {
+          const data = JSON.parse(localStorage.getItem("quiz_pro_state"));
+          State.quizType = data.type;
+          State.index = data.index;
+          State.answers = data.answers;
+          document.getElementById("modal-resume").classList.remove("visible");
+          this.renderQuestion();
+          this.showScreen("quiz");
+        },
+        clearAndRestart() {
+          this.clearState();
+          document.getElementById("modal-resume").classList.remove("visible");
+        },
+        clearState() {
+          localStorage.removeItem("quiz_pro_state");
+        },
+
+        // Helpers
+        haptic(style, notificationType) {
+          if (!this.tg) return;
+          if (style === "impact")
+            this.tg.HapticFeedback.impactOccurred("medium");
+          if (style === "light") this.tg.HapticFeedback.impactOccurred("light");
+          if (style === "notification")
+            this.tg.HapticFeedback.notificationOccurred(notificationType);
+        },
+        toast(msg) {
+          const t = document.getElementById("toast");
+          t.textContent = msg;
+          t.classList.add("visible");
+          setTimeout(() => t.classList.remove("visible"), 2000);
+        },
+      };
+
+      window.onload = () => App.init();
+
+      /**
+       * README / DEPLOYMENT GUIDE
+       * -------------------------
+       * 1. HOSTING:
+       * - Create a GitHub Repository and upload this index.html file.
+       * - Go to Settings -> Pages and enable GitHub Pages on the main branch.
+       * - Or, drag-and-drop this file into a Vercel/Netlify dashboard.
+       * * 2. TELEGRAM SETTINGS:
+       * - Open @BotFather on Telegram.
+       * - Run /newapp, select your bot, and enter the name/description.
+       * - Provide the URL of your hosted index.html.
+       * * 3. CUSTOMIZATION:
+       * - Update CONFIG variables (BOT_LINK, CHANNEL_LINK) at the top of the <script> section.
+       * - Modify QUIZ_DATA to change questions or add new quiz modes.
+       */
+    </script>
+  </body>
+</html>
